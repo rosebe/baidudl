@@ -6,7 +6,9 @@ app.controller('control', function($scope, $http){
 		var page = background.page;
 		console.log('initializing popup');
 		chrome.tabs.getSelected(null, function(tab){
-			if(!page || !page.url || tab.url != page.url.href){
+			let tab_url = new URL(tab.url);
+			tab_url.host = 'pan.baidu.com';
+			if(!page || !page.url || tab_url != page.url.href){
 				background.refresh(new URL(tab.url));
 				$scope.init(background);
 				return;
@@ -92,6 +94,16 @@ app.controller('control', function($scope, $http){
 			return;
 		}
 		$scope.background.page.downloadFile($scope.fileList[idx]);
+	};
+	// download all files through rpc
+	$scope.downloadAll = function(){
+		var downloaded = false;
+		$scope.fileList.forEach(function(file, idx){
+			if(!file.hlinks || !file.hlinks.length)return;
+			downloaded = true;
+			$scope.download(idx);
+		});
+		if(!downloaded)$scope.message = 'Warning: HLinks should be generated before download!';
 	};
 	// refresh vcode
 	$scope.refresh = function(){
