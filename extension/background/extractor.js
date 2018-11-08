@@ -76,7 +76,10 @@ function Extractor(file)
 					return cb(self.hlinks);
 				});
 			},
-			error: function(){
+			error: function(xhr, status, error){
+				console.log(xhr);
+				console.log(status);
+				log(error);
 				self.__anonymous_getHLinks__(cb);
 				return;
 			}
