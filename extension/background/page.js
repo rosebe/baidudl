@@ -144,8 +144,6 @@ function SharePage(url)
 				if(verify)self.vcode = false;
 				updatePopup();
 
-				// TODO: maybe we can get hlink list for once to reduce overhead. need further testing.
-				// Or maybe there should be an option to toggle the modes.
 				self.fileList.fileList.forEach(function(e){
 					if(e.glink)new Extractor(e).getHLinks();
 				});
@@ -352,9 +350,13 @@ function FileList(fileList)
 		log('updating glink list');
 		fileList.forEach(function(e){
 			var idx = self.fsidList.indexOf(e.fs_id);
-			var url = new URL(e.dlink);
-			url.host = 'c.pcs.baidu.com';
-			self.fileList[idx].glink = url.href;
+			if(e.dlink){
+				var url = new URL(e.dlink);
+				url.host = 'c.pcs.baidu.com';
+				self.fileList[idx].glink = url.href;
+			}else{
+				self.fileList[idx].glink = e.dlink;
+			}
 			self.fileList[idx].size = e.size;
 		});
 	};

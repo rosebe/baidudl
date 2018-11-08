@@ -117,7 +117,7 @@ app.controller('control', function($scope, $timeout){
 
 	// check whether a file is downloadable
 	$scope.downloadable = function(idx){
-		if(!$scope.fileList[idx].hlinks || !$scope.fileList[idx].hlinks.length)return false;
+		if(!$scope.fileList[idx].hlinks || $scope.fileList[idx].hlinks.length <= 1)return false;
 		return true;
 	};
 

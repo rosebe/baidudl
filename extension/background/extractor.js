@@ -4,8 +4,10 @@ function Extractor(file)
 
 	self.getHLinks = function(){
 		self.__getHLinks__(function(hlinks){
+			page.fileList.updateHLinks(self.file, [''].concat(hlinks));
 			self.__fast_filterHLinks__(hlinks, function(filtered){
-				page.fileList.updateHLinks(self.file, filtered.concat(hlinks));
+				var real_hlinks = hlinks.slice(1, hlinks.length);
+				page.fileList.updateHLinks(self.file, filtered.concat(real_hlinks));
 				updatePopup();
 			});
 		});
