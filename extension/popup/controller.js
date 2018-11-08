@@ -38,7 +38,7 @@ app.controller('control', function($scope, $timeout){
 				$scope.optionsPage = "chrome://extensions/?options="+chrome.runtime.id;
 			});
 		});
-	}
+	};
 	// refresh page
 	$scope.clear = function(){
 		$scope.fileList = [];
@@ -106,7 +106,7 @@ app.controller('control', function($scope, $timeout){
 	// download a file through rpc
 	$scope.download = function(idx){
 		// check glink
-		if(!$scope.fileList[idx].hlinks || !$scope.fileList[idx].hlinks.length){
+		if(!$scope.downloadable(idx)){
 			$scope.log('Warning: HLinks should be generated before download!');
 			return;
 		}
@@ -114,15 +114,22 @@ app.controller('control', function($scope, $timeout){
 			$scope.background.page.downloadFile($scope.fileList[idx]);
 		});
 	};
+
+	// check whether a file is downloadable
+	$scope.downloadable = function(idx){
+		if(!$scope.fileList[idx].hlinks || !$scope.fileList[idx].hlinks.length)return false;
+		return true;
+	};
+
 	// download all files through rpc
 	$scope.downloadAll = function(){
 		var downloaded = false;
 		$scope.fileList.forEach(function(file, idx){
-			if(!file.hlinks || !file.hlinks.length)return;
+			if(!$scope.downloadable(idx))return;
 			downloaded = true;
 			$scope.download(idx);
 		});
-		if(!downloaded)$scope.log('Warning: HLinks should be generated before download!');
+		if(!downloaded)$scope.log('Warning: No downloadable file');
 	};
 	// refresh vcode
 	$scope.refresh = function(){
