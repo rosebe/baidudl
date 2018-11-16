@@ -4,8 +4,10 @@ function Extractor(file)
 
 	self.getHLinks = function(){
 		self.__getHLinks__(function(hlinks){
+			page.fileList.updateHLinks(self.file, [''].concat(hlinks));
 			self.__fast_filterHLinks__(hlinks, function(filtered){
-				page.fileList.updateHLinks(self.file, filtered.concat(hlinks));
+				var real_hlinks = hlinks.slice(1, hlinks.length);
+				page.fileList.updateHLinks(self.file, filtered.concat(real_hlinks));
 				updatePopup();
 			});
 		});
@@ -29,23 +31,23 @@ function Extractor(file)
 		self.hlinks = [];
 
 		// only anonymously get hlinks
-		self.__anonymous_getHLinks__(cb);
+		///self.__anonymous_getHLinks__(cb);
 		// get hlinks according to account status
-		//if(!page.bduss){
-		//	self.__anonymous_getHLinks__(cb);
-		//	return;
-		//}
-		//else{
-		//	self.__login_getHLinks__(cb);
-		//	return;
-		//}
+		if(!page.bduss){
+			self.__anonymous_getHLinks__(cb);
+			return;
+		}
+		else{
+			self.__login_getHLinks__(cb);
+			return;
+		}
 	};
 	self.__login_getHLinks__ = function(cb){
 		log('Try to get hlinks when logged in');
 		var parsed_glink = self.parsed_glink;
 
 		var pathnames = parsed_glink.pathname.split('/');
-		var url = 'https://d.pcs.baidu.com/rest/2.0/pcs/file?dstime='+parsed_glink.searchParams.get('dstime')+'&version=2.2.0&vip=1&path='+pathnames[pathnames.length-1]+'&fid='+parsed_glink.searchParams.get('fid')+'&rt=sh&sign='+parsed_glink.searchParams.get('sign')+'&expires=8h&chkv=1&method=locatedownload&app_id=250528&esl=0&ver=4.0';
+		var url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file?dstime='+parsed_glink.searchParams.get('dstime')+'&version=2.2.0&vip=1&path='+pathnames[pathnames.length-1]+'&fid='+parsed_glink.searchParams.get('fid')+'&rt=sh&sign='+parsed_glink.searchParams.get('sign')+'&expires=8h&chkv=1&method=locatedownload&app_id=250528&esl=0&ver=4.0';
 		$.ajax({
 			url: url,
 			dataType: 'json',
@@ -74,7 +76,10 @@ function Extractor(file)
 					return cb(self.hlinks);
 				});
 			},
-			error: function(){
+			error: function(xhr, status, error){
+				console.log(xhr);
+				console.log(status);
+				log(error);
 				self.__anonymous_getHLinks__(cb);
 				return;
 			}
@@ -87,7 +92,7 @@ function Extractor(file)
 			type: 'HEAD',
 			timeout: 3000,
 			tryCount: 0,
-			retryLimit: 5,
+			retryLimit: 10,
 			success: function(res, status, request){
 				log('Catch glink successfully');
 				var tmp_hlink = request.getResponseHeader('url');
@@ -101,10 +106,10 @@ function Extractor(file)
 				cb(self.hlinks);
 			},
 			error: function(xhr, status, error){
-				log(xhr);
-				log(status);
+				console.log(xhr);
+				console.log(status);
 				log(error);
-				if(xhr.status == 400 || xhr.status == 0){
+				if(xhr.status != 200){
 					this.tryCount += 1;
 					if(this.tryCount <= this.retryLimit){
 						log('retry...');
@@ -131,6 +136,7 @@ function Extractor(file)
 		var filtered = [];
 		var promises = hlinks.map(function(e, i){
 			var func = function(){
+				log('Trying...');
 				var promise = $.ajax({
 					url: e,
 					type: 'HEAD',
@@ -210,20 +216,19 @@ function Extractor(file)
 chrome.webRequest.onBeforeSendHeaders.addListener(
 	function(details){
 		var headers = details.requestHeaders;
-		var index = -1;
 		for(var i=0; i<headers.length; i++){
 			if(headers[i].name == 'Cookie'){
-				index = i;
-				break;
+				headers[i].value = '';
 			}
-		}
-		if(index >= 0){
-			headers.splice(index, 1);
+			if(headers[i].name == 'User-Agent'){
+				headers[i].value = navigator.userAgent;
+			}
 		}
 		return {'requestHeaders': headers};
 	},
-	//{urls: ["*://pan.baidu.com/api/sharedownload*", "*://pan.baidu.com/api/download*", "*://d.pcs.baidu.com/file/*"]},
-	{urls: ["*://d.pcs.baidu.com/file/*"]},
+	//{urls: ["*://pan.baidu.com/api/sharedownload*", "*://pan.baidu.com/api/download*",
+	//		"*://d.pcs.baidu.com/file/*", "*://c.pcs.baidu.com/file/*"]},
+	{urls: ["*://d.pcs.baidu.com/file/*", "*://c.pcs.baidu.com/file/*"]},
 	['blocking', 'requestHeaders']
 );
 
@@ -257,19 +262,19 @@ chrome.webRequest.onHeadersReceived.addListener(
 	['blocking', 'responseHeaders']
 );
 
-chrome.webRequest.onBeforeSendHeaders.addListener(
-	function(details){
-		var headers = details.requestHeaders;
-		var index = -1;
-		for(var i=0; i<headers.length; i++){
-			if(headers[i].name == 'User-Agent'){
-				index = i;
-				headers[index].value = 'netdisk;2.2.0;macbaiduyunguanjia';
-				break;
-			}
-		}
-		return {'requestHeaders': headers};
-	},
-	{urls: ['*://d.pcs.baidu.com/rest/2.0/pcs/file?*']},
-	['blocking', 'requestHeaders']
-);
+//chrome.webRequest.onBeforeSendHeaders.addListener(
+//	function(details){
+//		var headers = details.requestHeaders;
+//		var index = -1;
+//		for(var i=0; i<headers.length; i++){
+//			if(headers[i].name == 'User-Agent'){
+//				index = i;
+//				headers[index].value = 'netdisk;2.2.0;macbaiduyunguanjia';
+//				break;
+//			}
+//		}
+//		return {'requestHeaders': headers};
+//	},
+//	{urls: ['*://d.pcs.baidu.com/rest/2.0/pcs/file?*']},
+//	['blocking', 'requestHeaders']
+//);

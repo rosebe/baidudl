@@ -144,8 +144,6 @@ function SharePage(url)
 				if(verify)self.vcode = false;
 				updatePopup();
 
-				// TODO: maybe we can get hlink list for once to reduce overhead. need further testing.
-				// Or maybe there should be an option to toggle the modes.
 				self.fileList.fileList.forEach(function(e){
 					if(e.glink)new Extractor(e).getHLinks();
 				});
@@ -194,6 +192,9 @@ function HomePage(url)
 		self.yunData = [];
 		self.fileList = [];
 		self.sharePage = undefined;
+		chrome.cookies.get({url: 'https://pan.baidu.com/', name: 'BDUSS'}, function(cookie){
+			self.bduss = cookie? cookie.value:'';
+		});
 	};
 
 	// get yunData in home page
@@ -349,7 +350,13 @@ function FileList(fileList)
 		log('updating glink list');
 		fileList.forEach(function(e){
 			var idx = self.fsidList.indexOf(e.fs_id);
-			self.fileList[idx].glink = e.dlink;
+			if(e.dlink){
+				var url = new URL(e.dlink);
+				url.host = 'c.pcs.baidu.com';
+				self.fileList[idx].glink = url.href;
+			}else{
+				self.fileList[idx].glink = e.dlink;
+			}
 			self.fileList[idx].size = e.size;
 		});
 	};

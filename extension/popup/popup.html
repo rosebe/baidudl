@@ -17,7 +17,7 @@
 
 	<body>
 		<div id='app' ng-app="popup" ng-csp ng-controller='control'>
-			<div>
+			<div style="overflow: auto">
 				<div style="margin: 10px 10px;text-align:right;float:left">
 					<button style="width: 80px" ng-click="openOptionPage()">Options</button>
 				</div>
@@ -28,7 +28,7 @@
 					<strong>RPC Address</strong>
 					<select ng-model="rpc" ng-options="rpc.protocol+'://'+rpc.host+':'+rpc.port+'/jsonrpc' for rpc in background.config.rpcList" ng-change="rpcChange()"></select>
 				</div>
-			<div>
+			</div>
 			<table>
 				<tr>
 					<td><button ng-hide="pageCheck()" ng-click="checkAll()">CheckAll</button></td>
@@ -53,7 +53,7 @@
 						<input style="width: 50px" type='text' value='NA' ng-disabled="true" ng-switch-default>
 					</td>
 					<td><button style="width: 60px" ng-click="copy($index, 'hlink')">Copy</button></td>
-					<td><button style="width: 100px" ng-click="download($index)" ng-hide="x.isdir">RPCDownload</td>
+					<td><button style="width: 100px" ng-click="download($index)" ng-disabled="!downloadable($index)" ng-hide="x.isdir">RPCDownload</td>
 				</tr>
 			</table>
 			<div><button ng-click="prev()">&lt;</button>{{page.pageno}}<button ng-click="next()">&gt;</button></div>

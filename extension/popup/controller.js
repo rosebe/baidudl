@@ -3,11 +3,24 @@ app.controller('control', function($scope, $timeout){
 
 	// init
 	$scope.init = function(background){
-		var page = background.page;
 		console.log('initializing popup');
+		chrome.cookies.get({url: 'https://pan.baidu.com/', name: 'BDUSS'}, function(cookie){
+			var bduss = cookie? cookie.value:'';
+			if(!bduss)$scope.$apply(function(){
+				$scope.message = 'You need to login first!';
+				console.log($scope);
+			});
+			else{
+				$scope.execute(background);
+			}
+		});
+	};
+
+	$scope.execute = function(background){
+		var page = background.page;
 		chrome.tabs.getSelected(null, function(tab){
-			let tab_url = new URL(tab.url);
-			tab_url.host = 'pan.baidu.com';
+			var tab_url = new URL(tab.url);
+			if(tab_url.host == 'yun.baidu.com')tab_url.host = 'pan.baidu.com';
 			if(!page || !page.url || tab_url != page.url.href){
 				background.refresh(new URL(tab.url));
 				$scope.init(background);
@@ -49,12 +62,12 @@ app.controller('control', function($scope, $timeout){
 		if(type == 'hlink')$scope.textarea.val($scope.fileList[idx].hlinks[0]);
 		else $scope.textarea.val($scope.fileList[idx].glink);
 		if(!$scope.textarea.val()){
-			$scope.message += "This field is empty\n";
+			$scope.log("This field is empty");
 			return;
 		}
 		$scope.textarea[0].select();
-		if(document.execCommand("copy"))$scope.message += "Copy success\n";
-		else $scope.message += "Copy failure\n";
+		if(document.execCommand("copy"))$scope.log("Copy success");
+		else $scope.log("Copy failure");
 		$scope.textarea.val('');
 	};
 	// copy all links to clipboard
@@ -72,12 +85,12 @@ app.controller('control', function($scope, $timeout){
 		}
 		$scope.textarea.val(links.join('\n'));
 		if(!$scope.textarea.val()){
-			$scope.message += "No links\n";
+			$scope.log("No links");
 			return;
 		}
 		$scope.textarea[0].select();
-		if(document.execCommand("copy"))$scope.message += "Copy all success\n";
-		else $scope.message += "Copy failure\n";
+		if(document.execCommand("copy"))$scope.log("Copy all success");
+		else $scope.log("Copy failure");
 		$scope.textarea.val('');
 	};
 	// check all checker boxes
@@ -93,23 +106,30 @@ app.controller('control', function($scope, $timeout){
 	// download a file through rpc
 	$scope.download = function(idx){
 		// check glink
-		if(!$scope.fileList[idx].hlinks || !$scope.fileList[idx].hlinks.length){
-			$scope.message += 'Warning: HLinks should be generated before download!\n';
+		if(!$scope.downloadable(idx)){
+			$scope.log('Warning: HLinks should be generated before download!');
 			return;
 		}
 		$timeout(function(){
 			$scope.background.page.downloadFile($scope.fileList[idx]);
 		});
 	};
+
+	// check whether a file is downloadable
+	$scope.downloadable = function(idx){
+		if(!$scope.fileList[idx].hlinks || $scope.fileList[idx].hlinks.length <= 1)return false;
+		return true;
+	};
+
 	// download all files through rpc
 	$scope.downloadAll = function(){
 		var downloaded = false;
 		$scope.fileList.forEach(function(file, idx){
-			if(!file.hlinks || !file.hlinks.length)return;
+			if(!$scope.downloadable(idx))return;
 			downloaded = true;
 			$scope.download(idx);
 		});
-		if(!downloaded)$scope.message += 'Warning: HLinks should be generated before download!\n';
+		if(!downloaded)$scope.log('Warning: No downloadable file');
 	};
 	// refresh vcode
 	$scope.refresh = function(){
@@ -147,6 +167,11 @@ app.controller('control', function($scope, $timeout){
 		$timeout(function(){
 			$scope.background.page.next();
 		});
+	};
+
+	$scope.log = function(msg){
+		$scope.message += msg+'\n';
+		$scope.scrollDown();
 	};
 
 	$scope.scrollDown = function(){

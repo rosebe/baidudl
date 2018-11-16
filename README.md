@@ -6,6 +6,9 @@ It is for extracting high speed download links from pan.baidu.com.
 
 The [old baidudl extension](https://chrome.google.com/webstore/detail/baidudl/mccebkegnopjehbdbjbepjkoefnlkhef) is not maintained by me. And it has been found to be modified to be a **malicious extension** which will use your facebook token to do something unknown. If you are not sure about which version you are using, please reinstall the extension.
 
+## How to create a Baidu account without a Chinese phone number
+Follow [this tutorial](http://livejinju.com/how-to-register-baidu-without-mainland-china-number/)
+
 ## Installation
 
 ### Method1: [Find this extension on chrome web store](https://chrome.google.com/webstore/detail/baidudl/lflnkcmjnhfedgibjackiibmcdnnoadb)
@@ -34,7 +37,7 @@ Select the directory containing baidudl
 
 ## How to use baidudl so that your download speed won't be limited
 
-![a screenshot](https://raw.githubusercontent.com/Kyle-Kyle/baidudl/master/extension/screenshots/screenshot3.png)
+![a screenshot](https://raw.githubusercontent.com/Kyle-Kyle/baidudl/master/screenshots/screenshot3.png)
 
 
 ### Method1: Directly download(not recommended)
