@@ -217,9 +217,6 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 	function(details){
 		var headers = details.requestHeaders;
 		for(var i=0; i<headers.length; i++){
-			if(headers[i].name == 'Cookie'){
-				headers[i].value = '';
-			}
 			if(headers[i].name == 'User-Agent'){
 				headers[i].value = navigator.userAgent;
 			}
