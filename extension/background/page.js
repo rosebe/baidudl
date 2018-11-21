@@ -118,10 +118,11 @@ function SharePage(url)
 	// get glink
 	self.getGLinks = function(cb, verify=false, vcode=undefined, input=undefined){
 		log('getting glink list...');
-		var url = "http://pan.baidu.com/api/sharedownload?sign="+self.yunData.sign+"&timestamp="+self.yunData.timestamp;
+		var url = "http://pan.baidu.com/api/sharedownload?sign="+self.yunData.sign+"&timestamp="+self.yunData.timestamp+"&bdstoken="+self.yunData.bdstoken+"&channel=chunlei&web=1&app_id=250528&clienttype=0";
 		var data = "encrypt=0&product=share&uk="+self.yunData.uk+"&primaryid="+self.yunData.shareid;
 		data += '&fid_list='+JSON.stringify(self.fileList.fsidList);
 		data += "&extra="+self.extra;
+		data += "&type=nolimit";
 		if(verify){
 			if(!vcode || !input){
 				log('GLink verification error.');
@@ -352,7 +353,6 @@ function FileList(fileList)
 			var idx = self.fsidList.indexOf(e.fs_id);
 			if(e.dlink){
 				var url = new URL(e.dlink);
-				url.host = 'c.pcs.baidu.com';
 				self.fileList[idx].glink = url.href;
 			}else{
 				self.fileList[idx].glink = e.dlink;

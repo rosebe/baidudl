@@ -3,12 +3,15 @@ function DownloadManager(file)
 	var self = this;
 
 	self.download = function(){
-		if(!self.file.hlinks){
+		var hlinks = self.file.hlinks.filter(function(e){
+			return e;
+		});
+		if(!hlinks){
 			log('Warning: HLinks should be obtained before download!');
 			updatePopup();
 			return;
 		}
-		self.__download__(self.file.hlinks);
+		self.__download__(hlinks);
 	};
 	self.__download__ = function(hlinks){
 		// prepare json request
