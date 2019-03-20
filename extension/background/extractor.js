@@ -235,7 +235,7 @@ chrome.webRequest.onHeadersReceived.addListener(
 		var bad_codes = [400, 403, 406, 503];
 		if(bad_codes.indexOf(details.statusCode) >= 0){
 			// drop packet if status code is bad
-			return {redirectUrl: 'javascript:'};
+			return {redirectUrl: 'javascript:'}; // jshint ignore:line
 		}
 		else if(details.statusCode == 302){
 			// get redirect url
@@ -245,8 +245,8 @@ chrome.webRequest.onHeadersReceived.addListener(
 			var url = new URL(header.value);
 
 			// drop packet if we know we are going to 401 or 403
-			if(url.pathname == '/401.html')return {redirectUrl: 'javascript:'};
-			if(url.pathname == '/403.html')return {redirectUrl: 'javascript:'};
+			if(url.pathname == '/401.html')return {redirectUrl: 'javascript:'};// jshint ignore:line
+			if(url.pathname == '/403.html')return {redirectUrl: 'javascript:'};// jshint ignore:line
 
 			// otherwise, we let the packet pass through
 			return {'responseHeaders': details.responseHeaders};
